@@ -1,0 +1,18 @@
+{
+    "api_id": "",
+    "api_hash": "",
+    "phone": "",
+    "keywords": [
+        "urgente",
+        "vaga",
+        "promoção",
+        "desconto",
+        "comprar"
+    ],
+    "notifications": {
+        "enabled": true,
+        "volume": 0.5,
+        "sound": "Som 1 (Beep)"
+    },
+    "monitor_active": true
+}
