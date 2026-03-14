@@ -5,22 +5,31 @@ import wave
 import struct
 
 def generate_sounds():
-    """Gera sons sintéticos mais altos e claros misturando ondas e frequências."""
+    """Gera sons sintéticos focados em frequências graves e confortáveis para o ouvido."""
     os.makedirs("sounds", exist_ok=True)
     
-    # Cada som é uma lista de tuplas: (frequência_hz, duração_segundos)
-    # Frequência 0 significa silêncio (pausa)
+    # Reduzindo drasticamente as frequências. O ouvido humano acha mais confortável sons entre 200Hz e 800Hz.
+    # Usando principalmente onda "sine" (senoidal) que é suave e redonda.
+    
     sounds = {
-        "Som 1 (Beep)": [(800, 0.3)],
-        "Som 2 (Alerta)": [(1200, 0.1), (0, 0.05), (1200, 0.1), (0, 0.05), (1200, 0.2)],
-        "Som 3 (Suave)": [(440, 0.2), (554, 0.2), (659, 0.5)],
-        "Som 4 (Sino)": [(1046.50, 0.1), (1318.51, 0.4)], 
-        "Som 5 (Urgente)": [(2000, 0.08), (0, 0.05), (2000, 0.08), (0, 0.05), (2000, 0.08), (0, 0.05), (2000, 0.08)]
+        # Um "tum" encorpado, como uma notificação moderna de celular (400Hz)
+        "Som 1 (Beep)": [(400, 0.3, "sine")],
+        
+        # Um zumbido grave de alerta duplo (tipo vibração forte de mesa - 150Hz)
+        "Som 2 (Alerta)": [(150, 0.15, "sine"), (0, 0.05, "sine"), (150, 0.2, "sine")],
+        
+        # Acorde suave de subida, muito confortável (Dó3, Mi3, Sol3 - graves)
+        "Som 3 (Suave)": [(261.63, 0.2, "sine"), (329.63, 0.2, "sine"), (392.00, 0.4, "sine")],
+        
+        # Um gongo tibetano suave (começa em 300Hz e vai decaindo na nossa percepção simulada)
+        "Som 4 (Sino)": [(300, 0.1, "sine"), (250, 0.5, "sine")], 
+        
+        # Notificação de "atenção" parecida com radar de submarino (Grave e rítmico - 200Hz)
+        "Som 5 (Urgente)": [(200, 0.08, "sine"), (0, 0.05, "sine")] * 4
     }
     
     for name, sequence in sounds.items():
         filename = f"sounds/{name}.wav"
-        # Regeramos todos os áudios para aplicar a nova potência
         sample_rate = 44100
         
         with wave.open(filename, 'w') as f:
@@ -28,44 +37,45 @@ def generate_sounds():
             f.setsampwidth(2)
             f.setframerate(sample_rate)
             
-            for freq, duration in sequence:
+            for freq, duration, wave_type in sequence:
                 n_samples = int(sample_rate * duration)
                 for i in range(n_samples):
-                    # Fade in/out muito curto apenas para evitar "estalos" no alto-falante
-                    env = 1.0
-                    if i < 200: env = i / 200
-                    elif i > n_samples - 200: env = (n_samples - i) / 200
+                    t = 2.0 * math.pi * freq * i / sample_rate
+                    val = math.sin(t)
                     
-                    if freq == 0:
-                        value = 0
-                    else:
-                        t = 2.0 * math.pi * freq * i / sample_rate
-                        sine_val = math.sin(t)
-                        # Mistura onda senoidal com onda quadrada para dar bastante volume e clareza
-                        square_val = 1.0 if sine_val > 0 else -1.0
-                        mixed = (sine_val * 0.3 + square_val * 0.7) * env
-                        # Multiplica pelo max volume suportado (32767) com um pequeno respiro (0.95)
-                        value = int(32767.0 * mixed * 0.95)
-                        
-                    data = struct.pack('<h', value)
-                    f.writeframesraw(data)
+                    # Suavização (Envelope) MUITO maior para deixar o som redondo
+                    # Fade in de 15% e Fade out de 40% do tempo do som
+                    env = 1.0
+                    fade_in_samples = int(n_samples * 0.15)
+                    fade_out_samples = int(n_samples * 0.4)
+                    
+                    if i < fade_in_samples: 
+                        env = i / fade_in_samples
+                    elif i > n_samples - fade_out_samples: 
+                        env = (n_samples - i) / fade_out_samples
+                    
+                    # Volume geral mais contido (70% do máximo) para não assustar
+                    value = int(32767.0 * val * env * 0.7)
+                    f.writeframesraw(struct.pack('<h', value))
 
 def init_audio():
     """Inicializa o sistema de som."""
     try:
-        pygame.mixer.init()
+        if not pygame.mixer.get_init():
+            pygame.mixer.init(frequency=44100, size=-16, channels=1)
         generate_sounds()
     except Exception as e:
-        print(f"Erro ao inicializar áudio: {e}")
+        print(f"Erro init áudio: {e}")
 
 def play_sound(name, volume):
-    """Toca o som especificado com o volume desejado."""
+    """Toca o som com reset forçado para evitar travamentos do buffer."""
     if not name: return
     filename = f"sounds/{name}.wav"
     if os.path.exists(filename):
         try:
+            pygame.mixer.stop() # Para som atual para não encavalar
             sound = pygame.mixer.Sound(filename)
             sound.set_volume(float(volume))
             sound.play()
         except Exception as e:
-            print(f"Erro ao tocar som: {e}")
+            print(f"Erro play: {e}")

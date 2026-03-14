@@ -11,7 +11,7 @@
     ],
     "notifications": {
         "enabled": true,
-        "volume": 0.5,
+        "volume": 0.2,
         "sound": "Som 1 (Beep)"
     },
     "monitor_active": true

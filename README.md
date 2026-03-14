@@ -1,88 +1,59 @@
-# TG Monitor
+# TG Monitor Pro
 
-O **TG Monitor** é uma aplicação desktop desenvolvida em Python que monitora seus grupos e canais do Telegram em tempo real. Ele busca por palavras-chave (com suporte a regras compostas e ignorando acentos) e, ao encontrar uma correspondência, encaminha a mensagem automaticamente para as suas "Mensagens Salvas" e emite um alerta sonoro.
+TG Monitor Pro é uma aplicação desktop avançada desenvolvada em Python para monitorar em tempo real mensagens de canais e grupos do Telegram. Ideal para acompanhar palavras-chave específicas como alertas de promoções, vagas de emprego, sinais de mercado ou qualquer termo de interesse, automatizando o envio de notificações visuais, sonoras e repasses para o Discord.
 
-Ideal para monitorar promoções, vagas de emprego, alertas de servidores ou qualquer assunto do seu interesse sem precisar ficar lendo todos os grupos o tempo todo.
+## 🚀 Principais Funcionalidades
 
-## 🚀 Funcionalidades
+### 1. Busca Avançada (Modo Regex)
+Além da busca padrão (com operadores `+` para AND e `/` para OR), o sistema conta com um **Modo Regex**. Se ativado, permite buscar padrões complexos (ex: `vaga.*python` para encontrar "vaga" e "python" na mesma frase, ou `\d+% off` para encontrar descontos).
 
-* **Interface Gráfica Moderna (GUI):** Desenvolvida com CustomTkinter para um visual escuro (Dark Mode) e amigável.
-* **Monitoramento em Segundo Plano:** Utiliza threads assíncronas para não travar a interface enquanto monitora as mensagens.
-* **Regras de Busca Avançadas:**
-  * Ignora letras maiúsculas/minúsculas.
-  * **Ignora acentuação** (ex: buscar "basico" encontra "básico").
-  * **Operador E (`+`):** Buscar `iphone+15` exige que as duas palavras estejam na mensagem.
-  * **Operador OU (`/`):** Buscar `vt9+pro/basico` exige a palavra "vt9" E ("pro" OU "basico").
-* **Notificações Sonoras (Alertas):**
-  * Sintetizador próprio gerando áudios limpos e de alto volume (dispensa downloads extras de áudio).
-  * 5 tipos de toques disponíveis (Beep, Alerta, Suave, Sino e Urgente).
-  * Controle de volume e ativação global integrados.
-* **Sistema de Sessão:** Após o primeiro login, a sessão fica salva (usando `Telethon`), não necessitando do código OTP nas próximas inicializações.
+### 2. Filtros de Canais (Whitelist e Blacklist)
+Cansado de pesquisar IDs no Google? O app possui um botão mágico **"Listar Meus Canais"** que conecta ao seu Telegram e puxa a lista completa com os nomes e IDs dos seus grupos. Você pode adicionar canais à:
+*   **Whitelist:** O bot ignorará todo o resto e monitorará **apenas** estes canais.
+*   **Blacklist:** O bot monitorará tudo, **exceto** estes canais.
 
----
+### 3. Inteligência Anti-Spam
+Evita que seu PC apite sem parar se um usuário mandar a mesma mensagem várias vezes seguidas. Você define um tempo em segundos (ex: 60s). O bot "grava" a mensagem na memória e só te avisará novamente se a mesma mensagem for enviada após o tempo estipulado. O sistema conta com auto-limpeza de memória (Garbage Collector) para evitar vazamentos (Memory Leaks).
 
-## 🛠️ Tecnologias Utilizadas
+### 4. Integração nativa com Discord (Webhooks)
+Não quer ficar preso ao PC? Cole a URL de um Webhook do seu servidor do Discord na aba de "Integrações". O bot empacotará os alertas em balões bonitos (Embeds) e enviará instantaneamente para o seu Discord (PC ou Celular), contendo o nome do grupo, o texto completo e um **link clicável** que te leva direto para a mensagem original no aplicativo do Telegram.
 
-* **[Python 3.x](https://www.python.org/)** - Linguagem principal.
-* **[CustomTkinter](https://github.com/TomSchimansky/CustomTkinter)** - Interface gráfica moderna.
-* **[Telethon](https://docs.telethon.dev/)** - Interação assíncrona com a API nativa do Telegram.
-* **[Pygame](https://www.pygame.org/)** - Renderização e mixagem dos efeitos de áudio.
-* **[Unidecode](https://pypi.org/project/Unidecode/)** - Tratamento de textos e remoção de acentos para a busca otimizada.
+### 5. Histórico e Banco de Dados (SQLite)
+Todas as mensagens encontradas são salvas eternamente no banco de dados local (`monitor_history.db`). 
+*   Você pode ler o histórico completo sem abrir o Telegram (basta clicar no trecho da mensagem na aba "Histórico" para abrir um Pop-up de leitura).
+*   Você pode exportar todo o histórico para um arquivo `.csv` para relatórios ou planilhas do Excel.
 
----
+### 6. Sistema de Áudio Confortável
+5 alertas sonoros gerados sinteticamente com foco no conforto auditivo humano (frequências médias-graves e envelopes de fade-in/fade-out). Variam de um leve "Beep" até uma sirene de "Urgente", todos controláveis pela barra de volume.
 
-## ⚙️ Como Instalar e Rodar
+### 7. Comodidades de Uso
+*   **Auto-Start:** Pode ser configurado para abrir de forma invisível toda vez que você liga o computador.
+*   **Minimizar para a Bandeja (System Tray):** Fica escondido ao lado do relógio do Windows. 
+*   **Controles Rápidos:** Clique com o botão direito no ícone da bandeja para pausar ou retomar o monitoramento sem abrir a janela.
+*   **Auto-Reconexão:** Se sua internet cair, ele fica tentando reconectar silenciosamente a cada 10 segundos.
 
-### Pré-requisitos
-Você precisa do Python instalado em sua máquina.
+## ⚙️ Pré-Requisitos e Instalação
 
-1. **Clone o repositório:**
+Assegure-se de ter o **Python 3.10+** instalado no seu sistema. Em seguida, instale todas as bibliotecas necessárias rodando o comando no terminal:
+
 ```bash
-git clone https://github.com/mateusDsys/TG-Monitor.git
-cd TG-Monitor
+pip install customtkinter telethon pygame unidecode plyer pystray pillow requests winshell pypiwin32
 ```
 
-2. **Instale as dependências:**
-```bash
-pip install customtkinter telethon pygame unidecode
-```
+## 🔐 Como logar (API do Telegram)
+Para usar o aplicativo, você precisa criar as suas credenciais de Desenvolvedor no Telegram (é gratuito).
+1. Acesse [https://my.telegram.org](https://my.telegram.org)
+2. Faça login com seu número.
+3. Vá em "API development tools".
+4. Crie um aplicativo qualquer e copie o **API ID** e o **API Hash**.
+5. Abra o TG Monitor Pro e cole esses dados junto com seu número de telefone.
 
-3. **Execute a aplicação:**
-```bash
-python BotApp.py
-```
+*(O app suporta perfeitamente contas que possuem Autenticação de Dois Fatores - 2FA ativada).*
 
-### Onde encontro meu API ID e API Hash?
-Para que o bot leia o seu Telegram, ele precisa usar o seu perfil de desenvolvedor:
-1. Acesse: https://my.telegram.org e faça login com seu número.
-2. Vá em **API development tools**.
-3. Crie uma aplicação qualquer (o nome não importa).
-4. Copie o **App api_id** e o **App api_hash** e cole na tela inicial do TG Monitor.
-
----
-
-## 📦 Como gerar o Executável (.exe)
-
-Se você deseja transformar o script num programa autônomo (Portable) de 1 arquivo só para Windows, sem a necessidade de instalar o Python:
-
-1. Instale o PyInstaller:
-```bash
-pip install pyinstaller
-```
-
-2. Rode o comando de build (Ele embute a interface e retira a janela do console):
-```bash
-pyinstaller --noconfirm --onefile --windowed --name "TG_Monitor" --collect-all customtkinter BotApp.py
-```
-
-3. O arquivo final estará disponível na pasta `dist/TG_Monitor.exe`.
-
----
-
-## 🔒 Segurança e Privacidade
-
-* **Tudo Fica no seu PC:** A aplicação não possui backend de terceiros nem banco de dados na nuvem. Todas as suas credenciais (`config.json`) e sua sessão de login do Telegram (`session_monitor_gui.session`) ficam salvos **apenas localmente no seu computador** (na mesma pasta do executável).
-* **Nunca envie arquivos de sessão para a internet.** (Se for dar commit neste projeto, utilize um `.gitignore` para bloquear `.session` e `config.json`).
-
-## 📄 Licença
-Distribuído sob a licença MIT. Sinta-se à vontade para modificar e usar como quiser!
+## 🛠️ Arquitetura do Projeto
+*   `BotApp.py`: Interface Gráfica principal e orquestrador de eventos.
+*   `bot_telegram.py`: Motor de comunicação com a API do Telegram (`telethon`), responsável pela leitura e aplicação de regras e filtros.
+*   `bot_config.py`: Gerenciador de salvar/carregar as opções do usuário e cuidar do atalho de auto-start do Windows.
+*   `bot_audio.py`: Gerador matemático de ondas sonoras sintéticas e player de áudio usando o mixer do `pygame`.
+*   `bot_db.py`: Conexão com o banco de dados SQLite para gravação segura e leitura de histórico (`sqlite3`).
+*   `bot_discord.py`: Repassador de mensagens via requisições HTTP para a nuvem do Discord (`requests`).
